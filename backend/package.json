@@ -1,0 +1,26 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "CivicTrack Backend",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "axios": "^1.15.2",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.6",
+    "dotenv": "^16.6.1",
+    "express": "^4.22.1",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^8.23.1",
+    "nodemailer": "^8.0.7",
+    "openai": "^6.35.0",
+    "socket.io": "^4.8.3",
+    "socket.io-client": "^4.6.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
