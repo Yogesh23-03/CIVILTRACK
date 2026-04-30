@@ -4,6 +4,11 @@ const Issue = require('../models/Issue');
 const User = require('../models/User');
 const auth = require('../middleware/auth');
 const { detectDuplicate } = require('../services/aiDuplicateDetector'); // Imported your new service
+const {
+  sendComplaintRaisedEmail,
+  sendComplaintSuccessEmail
+} = require('../services/email.services');
+
 
 // ============== CHECK DUPLICATE API (AI POWERED) ==============
 router.post('/check-duplicate', async (req, res) => {
@@ -106,6 +111,13 @@ router.post('/', auth, async (req, res) => {
       userId: req.user.id
     });
     await complaint.save();
+    const user = await User.findById(req.user.id);
+
+await sendComplaintRaisedEmail(
+  user.email,
+  user.name,
+  complaint
+);
 
     const ward = complaint.location?.ward;
     if (ward) {
@@ -211,6 +223,19 @@ router.put('/:id/status', auth, async (req, res) => {
     }
     const complaint = await Complaint.findByIdAndUpdate(req.params.id, updateData, { new: true });
     res.json(complaint);
+    if (
+  ["resolved", "success", "completed"].includes(String(status).toLowerCase())
+) {
+  const user = await User.findById(complaint.userId);
+
+  if (user?.email) {
+    await sendComplaintSuccessEmail(
+      user.email,
+      user.name,
+      complaint
+    );
+  }
+}
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error' });

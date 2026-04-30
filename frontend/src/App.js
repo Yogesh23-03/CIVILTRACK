@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import ChatbaseTools from './components/ChatbaseTools';
+import VoiceComplaintButton from './components/VoiceComplaintButton';
 import LandingPage from './pages/LandingPage';
 import Dashboard from './pages/Dashboard';
 import ReportComplaint from './pages/ReportComplaint';
@@ -30,6 +31,14 @@ const AdminRoute = ({ children }) => {
   return children;
 };
 
+const FloatingVoiceComplaint = () => {
+  const { user } = useAuth();
+
+  if (!user || user.role === 'admin') return null;
+
+  return <VoiceComplaintButton floating />;
+};
+
 function App() {
   return (
     <Router>
@@ -37,6 +46,7 @@ function App() {
         <div className="app">
           <Navbar />
           <ChatbaseTools />
+          <FloatingVoiceComplaint />
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />

@@ -159,17 +159,25 @@ export const deleteAdminUser = async (userId) => {
   const response = await api.delete(`/admin/users/${userId}`);
   return response.data;
 };
-
 export const fetchCallComplaints = async () => {
-  const response = await api.get('/call-complaints');
-  return response.data || [];
+  try {
+    const response = await api.get('/voice-complaints');
+    return (response.data || []).map(normalizeComplaint);
+  } catch (error) {
+    console.error('Error fetching voice complaints:', error);
+    return [];
+  }
 };
 
 export const updateCallComplaintStatus = async (complaintId, status) => {
-  const response = await api.patch(`/call-complaints/${complaintId}/status`, { status });
-  return response.data;
+  try {
+    const response = await api.put(`/complaints/${complaintId}/status`, { status });
+    return response.data;
+  } catch (error) {
+    console.error('Error updating voice complaint status:', error);
+    throw error;
+  }
 };
-
 export const askChatbotComplaintQuestion = async (question) => {
   const response = await api.post('/chatbot/query', { question });
   return response.data;

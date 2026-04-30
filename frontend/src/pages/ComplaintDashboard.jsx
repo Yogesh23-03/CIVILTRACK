@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import * as apiService from '../services/apiService';
 import './ComplaintDashboard.css';
+import VoiceComplaintButton from '../components/VoiceComplaintButton';
 
 const ComplaintDashboard = () => {
   const [complaints, setComplaints] = useState([]);
@@ -21,21 +22,19 @@ const ComplaintDashboard = () => {
   const loadComplaints = async () => {
     setLoading(true);
     try {
-      // Load complaints from backend API
       const data = await apiService.fetchComplaints();
       const callData = await apiService.fetchCallComplaints();
       const allComplaints = [
         ...data,
-        ...callData.map(complaint => ({ ...complaint, source: 'vapi-call', upvotes: 0 }))
+        ...callData.map(complaint => ({ ...complaint, source: 'voice', upvotes: 0 }))
       ].sort((a, b) => new Date(b.date || b.createdAt) - new Date(a.date || a.createdAt));
       setComplaints(allComplaints);
-      
-      // Calculate stats
+
       const total = allComplaints.length;
       const resolved = allComplaints.filter(c => c.status === 'resolved').length;
       const pending = allComplaints.filter(c => c.status === 'pending').length;
       const inProgress = allComplaints.filter(c => c.status === 'in-progress').length;
-      
+
       setStats({ total, resolved, pending, inProgress });
     } catch (error) {
       console.error('Error loading complaints:', error);
@@ -52,7 +51,7 @@ const ComplaintDashboard = () => {
   ];
 
   const getStatusBadge = (status) => {
-    switch(status) {
+    switch (status) {
       case 'pending': return <span className="status-badge status-pending">⏳ PENDING</span>;
       case 'in-progress': return <span className="status-badge status-in-progress">🔄 IN PROGRESS</span>;
       case 'resolved': return <span className="status-badge status-resolved">✅ RESOLVED</span>;
@@ -62,12 +61,14 @@ const ComplaintDashboard = () => {
 
   return (
     <div className="dashboard-container">
+
+      {/* ── Header ── */}
       <div className="dashboard-header">
         <h1 className="dashboard-title">📊 Citizen Dashboard</h1>
         <p className="dashboard-subtitle">Track your complaints and city statistics</p>
       </div>
 
-      {/* Stats Grid */}
+      {/* ── Stats Grid ── */}
       <div className="stats-grid">
         {statsCards.map((stat, index) => (
           <motion.div
@@ -84,15 +85,30 @@ const ComplaintDashboard = () => {
         ))}
       </div>
 
-      {/* Recent Complaints */}
+      {/* ── Recent Complaints Section ── */}
       <div className="recent-section">
+
+        {/* Section header with New Complaint button */}
         <div className="section-header">
           <h2 className="section-title">Recent Complaints</h2>
           <Link to="/report">
             <button className="new-complaint-btn">+ New Complaint</button>
           </Link>
         </div>
-        
+
+        {/* Voice complaint button */}
+        <VoiceComplaintButton
+          onSuccess={(newComplaint) => {
+            setComplaints(prev => [newComplaint, ...prev]);
+            setStats(prev => ({
+              ...prev,
+              total: prev.total + 1,
+              pending: prev.pending + 1,
+            }));
+          }}
+        />
+
+        {/* Complaints list */}
         {loading ? (
           <div className="loading-state">Loading complaints...</div>
         ) : complaints.length === 0 ? (
@@ -124,13 +140,13 @@ const ComplaintDashboard = () => {
                   </div>
                   {getStatusBadge(complaint.status)}
                 </div>
-                
+
                 <p className="complaint-description">{complaint.description}</p>
-                
+
                 <div className="complaint-footer">
                   <div className="complaint-details">
                     <span>📅 {new Date(complaint.date).toLocaleDateString()}</span>
-                    <span>📍 {complaint.location}</span>
+                    <span>📍 {complaint.locationText}</span>
                     <span>👍 {complaint.upvotes} upvotes</span>
                   </div>
                 </div>
@@ -138,7 +154,10 @@ const ComplaintDashboard = () => {
             ))}
           </div>
         )}
+
       </div>
+      {/* end recent-section */}
+
     </div>
   );
 };

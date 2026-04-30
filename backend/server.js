@@ -5,6 +5,7 @@ const dotenv = require('dotenv');
 const http = require('http');
 const socketIo = require('socket.io');
 const connectToDB=require('./config/db')
+const voiceComplaintsRouter = require('./routes/voiceComplaints');
 
 dotenv.config();
 
@@ -55,6 +56,7 @@ app.use('/api/import', require('./routes/import'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/call-complaints', require('./routes/callComplaints'));
 app.use('/api/chatbot', require('./routes/chatbot'));
+app.use('/api/voice-complaints', voiceComplaintsRouter);
 
 // Basic route
 app.get('/', (req, res) => {
