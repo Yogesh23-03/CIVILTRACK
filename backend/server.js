@@ -13,7 +13,7 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
   cors: {
-    origin: "https://civiltrack-frontend.onrender.com/api",
+    origin: "https://civiltrack-frontend.onrender.com",
     methods: ["GET", "POST"]
   }
 });
